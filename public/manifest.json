@@ -2,10 +2,23 @@
   "manifest_version": 3,
   "name": "React Chrome Extension",
   "version": "1.0",
-  "permissions": ["storage", "activeTab", "scripting", "sidePanel", "windows"],
+  "permissions": [
+    "tabCapture",
+    "scripting",
+    "activeTab",
+    "storage",
+    "tabs",
+    "downloads",
+    "downloads.shelf",
+    "sidePanel",
+    "debugger",
+    "desktopCapture",
+    "webNavigation"
+  ],
   "host_permissions": ["https://*/*", "http://*/*"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_icon": "icon.png",
@@ -17,7 +30,11 @@
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],
-      "js": ["content.js"]
+      "js": ["content.js",   "rrweb.min.js", "html2canvas.min.js"]
     }
-  ]
+  ],
+  "web_accessible_resources": [{
+    "resources": ["rrweb.min.js", "html2canvas.min.js", "background.js"],
+    "matches": ["<all_urls>"]
+  }]
 }

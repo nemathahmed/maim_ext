@@ -1,4 +1,5 @@
 const path = require("path");
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -49,4 +50,18 @@ module.exports = {
     },
     mode: 'development',
     devtool: 'inline-source-map',
+    plugins: [
+        new CopyPlugin({
+            patterns: [
+                { 
+                    from: 'node_modules/rrweb/dist/rrweb.min.js',
+                    to: '[name][ext]'
+                },
+                {
+                    from: 'node_modules/html2canvas/dist/html2canvas.min.js',
+                    to: '[name][ext]'
+                }
+            ],
+        }),
+    ],
 };
