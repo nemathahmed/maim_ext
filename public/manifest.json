@@ -15,7 +15,7 @@
     "desktopCapture",
     "webNavigation"
   ],
-  "host_permissions": ["https://*/*", "http://*/*"],
+  "host_permissions": ["https://*/*", "http://*/*","ws://34.171.7.176:9223/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"

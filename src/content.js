@@ -36,8 +36,15 @@ window.addEventListener("message", (event) => {
         });
     }
 
-
-
+    // Add handler for start recording message
+    if (event.data.type === "START_RECORDING") {
+        console.log("CONTENT SCRIPT: Received start recording message");
+        // Forward to sidepanel via background script
+        chrome.runtime.sendMessage({ 
+            type: "START_RECORDING",
+            target: "sidepanel"
+        });
+    }
 }); 
 
 window.postMessage({ type: "EXTENSION_INSTALLED" }, "*");

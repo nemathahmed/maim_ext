@@ -1,4 +1,5 @@
 // import { createClient } from './supabase.js';
+import './background_agent.js';
 import { createClient } from '@supabase/supabase-js';
 console.log("Creating supabase client");
 const SUPABASE_URL = 'https://scydgsnstcmcdfxrgvoh.supabase.co';
@@ -123,11 +124,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 function create_window(window_type, payload) {
     payload.windowType = window_type;
+    if (window_type === "CREATE_RECORDING_WINDOW") {
     chrome.windows.create({
         focused: true,
         type: 'normal',
         state: 'maximized',
-        url: 'https://preview--workflow-chat-buddy-04.lovable.app/screen-recording'
+        url: window_type === "CREATE_RECORDING_WINDOW" 
+            ? 'https://preview--workflow-chat-buddy-04.lovable.app/recording-screen'
+            : 'about:blank'
     },
     (window) => {
         window_payload_map.set(window.id, payload);
@@ -145,7 +149,30 @@ function create_window(window_type, payload) {
         });
     });
 }
-
+else if (window_type === "CREATE_AGENT_RUN_WINDOW") {
+    chrome.windows.create({
+        focused: true,
+        type: 'normal',
+        state: 'maximized',
+        
+    },
+    (window) => {
+        window_payload_map.set(window.id, payload);
+        // Open the side panel in the newly created window
+        let run_id = payload.runId;
+        if (run_id) {
+            run_id_to_window_id_map.set(run_id, window.id);
+        }
+        chrome.sidePanel.open({ windowId: window.id }, () => {
+            if (chrome.runtime.lastError) {
+                console.error("Failed to open side panel:", chrome.runtime.lastError);
+            } else {
+                console.log("Side panel opened in new window");
+            }
+        });
+    });
+}
+}
 // Get the window ID of the current tab
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "get-window-payload") {

@@ -1,0 +1,40 @@
+{
+    "name": "CDP Screen Recorder",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+        "tabCapture",
+        "scripting",
+        "activeTab",
+        "storage",
+        "tabs",
+        "downloads",
+        "downloads.shelf",
+        "sidePanel",
+        "debugger",
+        "desktopCapture",
+        "webNavigation"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_title": "Start Debugger"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "run_at": "document_start"
+      }
+    ],
+    "devtools_page": "devtools.html",
+    "side_panel": {
+      "default_path": "sidepanel.html"
+    }
+    
+  }
+  

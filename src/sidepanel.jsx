@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
+// import './background_agent.js';
 // import ChatInterface from "../../workflow-chat-buddy/src/components/ChatInterface";
 // import App from "../../workflowlchat-buddy/src/App";
 // import Index from "../../workflow-chat-buddy/src/pages/Index";
 
 // import { createClient } from './supabase.js';
+
 import { createClient } from '@supabase/supabase-js';
 console.log("Creating supabase client in sidepanel");
 const SUPABASE_URL = 'https://scydgsnstcmcdfxrgvoh.supabase.co';
@@ -30,19 +32,19 @@ const channel = supabase
       let type = payload.new.type;
       console.log('Sender type:', sender_type);
       console.log('Type:', type);
-      if (sender_type === 'backend' && type === 'command') {
-        console.log('Command received:', payload.new.display_text);
-        await supabase.from("run_messages").insert({
-          "run_id": payload.new.run_id,
-          "type": "result",
-          "chat_id": payload.new.chat_id,
-          "sender_type": "extension",
-          "display_text": "Command received",
-          "payload": {
-            "dom": "fake"
-          }
-        });
-      } 
+    //   if (sender_type === 'backend' && type === 'command') {
+    //     console.log('Command received:', payload.new.display_text);
+    //     await supabase.from("run_messages").insert({
+    //       "run_id": payload.new.run_id,
+    //       "type": "result",
+    //       "chat_id": payload.new.chat_id,
+    //       "sender_type": "extension",
+    //       "display_text": "Command received",
+    //       "payload": {
+    //         "dom": "fake"
+    //       }
+    //     });
+    //   } 
     }
   )
   .subscribe();
@@ -50,7 +52,13 @@ const channel = supabase
 // Add this at the top level, near other global variables
 let globalWindowPayload = null;
 let recordingMessageId = null; // Add this near other global variables
-
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = tabs[0];
+    chrome.runtime.sendMessage({
+      type: "sidepanel_opened",
+      windowId: tab.windowId,
+    });
+  });
 function SidePanel() {
     const [windowId, setWindowId] = useState("unknown");
     const [windowPayload, setWindowPayload] = useState("unknown");
@@ -73,7 +81,7 @@ function SidePanel() {
                                 username: 'current_user',
                                 from_template: false,
                                 is_currently_streaming: false,
-                                function_name: null
+                                function_name: 'recording_progress'
                             })
                             .select();
 
@@ -208,8 +216,22 @@ root.render(<SidePanel />);
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     console.log("Sidepanel: Received message:", message);
-    
-    if (message.action === "processScreenRecording") {
+    if (message.type === "START_RECORDING") {
+        // Dispatch message to window to trigger the useEffect handler
+        window.dispatchEvent(new MessageEvent('message', {
+            data: { type: 'START_RECORDING' }
+        }));
+        sendResponse({ status: "success" });
+        return true;
+    }
+    else if (message.type === "STOP_RECORDING") {
+        window.dispatchEvent(new MessageEvent('message', {
+            data: { type: 'STOP_RECORDING' }
+        }));
+        sendResponse({ status: "success" });
+        return true;
+    }
+    else if (message.action === "processScreenRecording") {
         console.log("Sidepanel: Processing screen recording");
         
         if (!message.videoBlob) {
@@ -378,3 +400,5 @@ async function processScreenRecording(videoBlob) {
 }
 
 
+
+  
